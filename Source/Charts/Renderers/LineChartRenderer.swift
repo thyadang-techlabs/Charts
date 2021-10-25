@@ -636,7 +636,7 @@ open class LineChartRenderer: LineRadarRenderer
 
             // Skip Circles and Accessibility if not enabled,
             // reduces CPU significantly if not needed
-            if !dataSet.isVisible || !dataSet.isDrawCirclesEnabled || dataSet.entryCount == 0
+            if !dataSet.isVisible || dataSet.entryCount == 0 //|| !dataSet.isDrawCirclesEnabled 가운데 Circle표기를 위해..
             {
                 continue
             }
@@ -675,6 +675,14 @@ open class LineChartRenderer: LineRadarRenderer
                 if (!viewPortHandler.isInBoundsLeft(pt.x) || !viewPortHandler.isInBoundsY(pt.y))
                 {
                     continue
+                }
+                
+                // 가운데 Circle만 표기
+                if !dataSet.isDrawCirclesEnabled
+                {
+                    if j != dataSet.entryCount / 2{
+                        continue
+                    }
                 }
                 
                 // Accessibility element geometry
