@@ -852,7 +852,6 @@ open class LineChartRenderer: LineRadarRenderer
                         .applying(matrix)
                     let normalizedLocation = (location.x - boundingBox.minX)
                         / (boundingBox.maxX - boundingBox.minX)
-                print(position, location, normalizedLocation)
                 return normalizedLocation.clamped(to: 0...1)
             }
 
