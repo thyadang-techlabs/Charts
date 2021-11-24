@@ -157,7 +157,20 @@ open class RadarChartRenderer: LineRadarRenderer
             }
             else
             {
-                drawFilledPath(context: context, path: path, fillColor: dataSet.fillColor, fillAlpha: dataSet.fillAlpha)
+//                drawFilledPath(context: context, path: path, fillColor: dataSet.fillColor, fillAlpha: dataSet.fillAlpha)
+                //그래프 내부 색상
+                context.saveGState()
+                context.beginPath()
+                context.addPath(path)
+                
+                // filled is usually drawn with less alpha
+                context.setAlpha(0.4)
+                context.setShadow(offset: CGSize(width: 0, height: 6), blur: 12, color: #colorLiteral(red: 0, green: 0.5294117647, blue: 0.7254901961, alpha: 0.4))
+                
+                context.setFillColor(#colorLiteral(red: 0, green: 0.6862745098, blue: 0.7764705882, alpha: 1))
+                context.fillPath()
+                
+                context.restoreGState()
             }
         }
         
@@ -186,6 +199,76 @@ open class RadarChartRenderer: LineRadarRenderer
         
         accessibilityPostLayoutChangedNotification()
 
+        //그래프 내부 대각선 라인
+        context.setLineWidth(1)
+        context.setStrokeColor(#colorLiteral(red: 0.2425819337, green: 1, blue: 1, alpha: 1))
+        context.setAlpha(0.5)
+        var pointArr = [CGPoint](repeating: CGPoint(), count: 6)
+        for j in 0 ..< entryCount{
+            let accessibilityValue = accessibilityAxisLabelValueTuples[j].1
+            let accessibilityValueIndex = accessibilityAxisLabelValueTuples[j].2
+            let axp = center.moving(distance: CGFloat((accessibilityValue - chart.chartYMin) * Double(factor) * phaseY),
+                                    atAngle: sliceangle * CGFloat(accessibilityValueIndex) * CGFloat(phaseX) + chart.rotationAngle)
+            
+            _webLineSegmentsBuffer[0].x = center.x
+            _webLineSegmentsBuffer[0].y = center.y
+            _webLineSegmentsBuffer[1].x = axp.x
+            _webLineSegmentsBuffer[1].y = axp.y
+            
+            context.strokeLineSegments(between: _webLineSegmentsBuffer)
+            
+            pointArr[accessibilityValueIndex] = axp
+        }
+
+        
+        //중앙 그라디언트
+        let color1 = [NSUIColor.init(white: 1.0, alpha: 1).cgColor, NSUIColor.init(white: 1.0, alpha: 0).cgColor]
+        let color2 = [NSUIColor.init(white: 0, alpha: 0.12).cgColor, NSUIColor.init(white: 0, alpha: 0).cgColor]
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let colorLocations: [CGFloat] = [0.0, 1.0]
+        guard let gradient1 = CGGradient(
+          colorsSpace: colorSpace,
+          colors: color1 as CFArray,
+          locations: colorLocations
+        ) else {
+            return
+        }
+        guard let gradient2 = CGGradient(
+          colorsSpace: colorSpace,
+          colors: color2 as CFArray,
+          locations: colorLocations
+        ) else {
+            return
+        }
+        
+        context.beginPath()
+        context.move(to: center)
+        for i in 0..<pointArr.count{
+            if i % 2 == 0{
+                context.addLine(to: pointArr[i])
+                if i == 0 {
+                    context.addLine(to: pointArr[pointArr.count-1])
+                }else{
+                    context.addLine(to: pointArr[i-1])
+                }
+                context.addLine(to: center)
+            }
+        }
+        context.clip()
+        context.drawRadialGradient(gradient1, startCenter: center, startRadius: 0, endCenter: center, endRadius: 45, options: [])
+        context.restoreGState()
+        
+        context.beginPath()
+        context.move(to: center)
+        for i in 0..<pointArr.count{
+            if i % 2 == 1{
+                context.addLine(to: pointArr[i])
+                context.addLine(to: pointArr[i-1])
+                context.addLine(to: center)
+            }
+        }
+        context.clip()
+        context.drawRadialGradient(gradient2, startCenter: center, startRadius: 0, endCenter: center, endRadius: 45, options: [])
         context.restoreGState()
     }
     
@@ -284,36 +367,16 @@ open class RadarChartRenderer: LineRadarRenderer
         
         let center = chart.centerOffsets
         
-        // draw the web lines that come from the center
-        context.setLineWidth(chart.webLineWidth)
-        context.setStrokeColor(chart.webColor.cgColor)
-        context.setAlpha(chart.webAlpha)
-        
         let xIncrements = 1 + chart.skipWebLineCount
         let maxEntryCount = chart.data?.maxEntryCountSet?.entryCount ?? 0
-
-        for i in stride(from: 0, to: maxEntryCount, by: xIncrements)
-        {
-            let p = center.moving(distance: CGFloat(chart.yRange) * factor,
-                                  atAngle: sliceangle * CGFloat(i) + rotationangle)
-            
-            _webLineSegmentsBuffer[0].x = center.x
-            _webLineSegmentsBuffer[0].y = center.y
-            _webLineSegmentsBuffer[1].x = p.x
-            _webLineSegmentsBuffer[1].y = p.y
-            
-            context.strokeLineSegments(between: _webLineSegmentsBuffer)
-        }
-        
-        // draw the inner-web
-        context.setLineWidth(chart.innerWebLineWidth)
-        context.setStrokeColor(chart.innerWebColor.cgColor)
-        context.setAlpha(chart.webAlpha)
-        
         let labelCount = chart.yAxis.entryCount
         
-        for j in 0 ..< labelCount
+        //배경 테두리 라인
+        context.setStrokeColor(#colorLiteral(red: 0.8941176471, green: 0.9135978818, blue: 0.9569106698, alpha: 1))
+        context.setAlpha(1)
+        for j in (0 ..< labelCount).reversed()
         {
+            var pointArr:[CGPoint] = []
             for i in 0 ..< data.entryCount
             {
                 let r = CGFloat(chart.yAxis.entries[j] - chart.chartYMin) * factor
@@ -326,8 +389,62 @@ open class RadarChartRenderer: LineRadarRenderer
                 _webLineSegmentsBuffer[1].x = p2.x
                 _webLineSegmentsBuffer[1].y = p2.y
                 
+                if j == labelCount-1{
+                    context.setLineWidth(1)
+                    context.setLineDash(phase: 0, lengths: [])
+                }else{
+                    context.setLineWidth(2)
+                    context.setLineDash(phase: 0, lengths: [3.0, 3.0])
+                }
+                
                 context.strokeLineSegments(between: _webLineSegmentsBuffer)
+                pointArr.append(p1)
             }
+            
+            //테두리 색채우기
+            context.beginPath()
+            context.move(to: pointArr[0])
+            for k in 1..<pointArr.count{
+                context.addLine(to: pointArr[k])
+            }
+            if j%2 == 0{
+                context.setFillColor(NSUIColor.init(red: 244/255, green: 247/255, blue: 254/255, alpha: 1).cgColor)
+            }else{
+                context.setFillColor(NSUIColor.init(red: 255/255, green: 255/255, blue: 255/255, alpha: 0.4).cgColor)
+            }
+            context.fillPath()
+        }
+        
+        //배경 대각선 라인
+        context.setLineWidth(1)
+        context.setStrokeColor(#colorLiteral(red: 0.8928452134, green: 0.9138256311, blue: 0.9553245902, alpha: 1))
+        context.setAlpha(1)
+        context.setLineDash(phase: 0, lengths: [3.0, 3.0])
+        var pointArr:[CGPoint] = []
+        for i in stride(from: 0, to: maxEntryCount, by: xIncrements)
+        {
+            let p = center.moving(distance: CGFloat(chart.yRange) * factor,
+                                  atAngle: sliceangle * CGFloat(i) + rotationangle)
+            
+            _webLineSegmentsBuffer[0].x = center.x
+            _webLineSegmentsBuffer[0].y = center.y
+            _webLineSegmentsBuffer[1].x = p.x
+            _webLineSegmentsBuffer[1].y = p.y
+            
+            context.strokeLineSegments(between: _webLineSegmentsBuffer)
+            pointArr.append(p)
+        }
+        
+        //테두리 원
+        context.setLineWidth(1)
+        context.setStrokeColor(#colorLiteral(red: 0.737072885, green: 0.7648418546, blue: 0.827041626, alpha: 1))
+        context.setLineDash(phase: 0, lengths: [])
+        context.setFillColor(NSUIColor.white.cgColor)
+        let raduis:CGFloat = 4
+        for i in pointArr{
+            let rect = CGRect(x: i.x - raduis/2, y: i.y - raduis/2, width: raduis, height: raduis)
+            context.fillEllipse(in: rect)
+            context.strokeEllipse(in: rect)
         }
         
         context.restoreGState()
