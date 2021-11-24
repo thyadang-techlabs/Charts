@@ -149,14 +149,14 @@ open class RadarChartRenderer: LineRadarRenderer
         path.closeSubpath()
         
         // draw filled
-        if dataSet.isDrawFilledEnabled
-        {
-            if dataSet.fill != nil
-            {
-                drawFilledPath(context: context, path: path, fill: dataSet.fill!, fillAlpha: dataSet.fillAlpha)
-            }
-            else
-            {
+//        if dataSet.isDrawFilledEnabled
+//        {
+//            if dataSet.fill != nil
+//            {
+//                drawFilledPath(context: context, path: path, fill: dataSet.fill!, fillAlpha: dataSet.fillAlpha)
+//            }
+//            else
+//            {
 //                drawFilledPath(context: context, path: path, fillColor: dataSet.fillColor, fillAlpha: dataSet.fillAlpha)
                 //그래프 내부 색상
                 context.saveGState()
@@ -171,14 +171,15 @@ open class RadarChartRenderer: LineRadarRenderer
                 context.fillPath()
                 
                 context.restoreGState()
-            }
-        }
+//            }
+//        }
         
         // draw the line (only if filled is disabled or alpha is below 255)
-        if !dataSet.isDrawFilledEnabled || dataSet.fillAlpha < 1.0
-        {
-            context.setStrokeColor(dataSet.color(atIndex: 0).cgColor)
-            context.setLineWidth(dataSet.lineWidth)
+//        if !dataSet.isDrawFilledEnabled || dataSet.fillAlpha < 1.0
+//        {
+            //그래프 아웃라인
+            context.setStrokeColor(#colorLiteral(red: 0.003275389783, green: 0.9987329841, blue: 0.9996680617, alpha: 1))
+            context.setLineWidth(1)
             context.setAlpha(1.0)
 
             context.beginPath()
@@ -195,7 +196,7 @@ open class RadarChartRenderer: LineRadarRenderer
 
             accessibleChartElements.append(axElement)
             accessibleChartElements.append(contentsOf: accessibilityEntryElements)
-        }
+//        }
         
         accessibilityPostLayoutChangedNotification()
 
