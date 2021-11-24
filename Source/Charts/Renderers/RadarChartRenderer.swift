@@ -204,7 +204,7 @@ open class RadarChartRenderer: LineRadarRenderer
         context.setLineWidth(1)
         context.setStrokeColor(#colorLiteral(red: 0.2425819337, green: 1, blue: 1, alpha: 1))
         context.setAlpha(0.5)
-        var pointArr = [CGPoint](repeating: CGPoint(), count: 6)
+        var pointArr = [CGPoint](repeating: CGPoint(), count: entryCount)
         for j in 0 ..< entryCount{
             let accessibilityValue = accessibilityAxisLabelValueTuples[j].1
             let accessibilityValueIndex = accessibilityAxisLabelValueTuples[j].2
@@ -245,7 +245,7 @@ open class RadarChartRenderer: LineRadarRenderer
         context.beginPath()
         context.move(to: center)
         for i in 0..<pointArr.count{
-            if i % 2 == 0{
+            if i % 2 == 0 && !(pointArr.count % 2 == 1 && i == 0){  // pointArr.count가 홀수이고 i == 0 이면 그라디언트 PASS
                 context.addLine(to: pointArr[i])
                 if i == 0 {
                     context.addLine(to: pointArr[pointArr.count-1])
