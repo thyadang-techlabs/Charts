@@ -35,6 +35,11 @@ open class RadarChartView: PieRadarChartViewBase
     /// flag indicating if the web lines should be drawn or not
     @objc open var drawWeb = true
     
+    @objc open var fillColor1 = NSUIColor.red
+    @objc open var fillColor2 = NSUIColor.blue
+    @objc open var strokeColor = NSUIColor.black
+    @objc open var circleStrokeColor = NSUIColor.black
+    
     /// modulus that determines how many labels and web-lines are skipped before the next is drawn
     private var _skipWebLineCount = 0
     

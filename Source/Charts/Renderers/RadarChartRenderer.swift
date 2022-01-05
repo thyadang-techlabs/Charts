@@ -373,7 +373,7 @@ open class RadarChartRenderer: LineRadarRenderer
         let labelCount = chart.yAxis.entryCount
         
         //배경 테두리 라인
-        context.setStrokeColor(#colorLiteral(red: 0.8941176471, green: 0.9135978818, blue: 0.9569106698, alpha: 1))
+        context.setStrokeColor(chart.strokeColor.cgColor)
         context.setAlpha(1)
         for j in (0 ..< labelCount).reversed()
         {
@@ -409,16 +409,16 @@ open class RadarChartRenderer: LineRadarRenderer
                 context.addLine(to: pointArr[k])
             }
             if j%2 == 0{
-                context.setFillColor(NSUIColor.init(red: 244/255, green: 247/255, blue: 254/255, alpha: 1).cgColor)
+                context.setFillColor(chart.fillColor2.cgColor)
             }else{
-                context.setFillColor(NSUIColor.init(red: 255/255, green: 255/255, blue: 255/255, alpha: 0.4).cgColor)
+                context.setFillColor(chart.fillColor1.cgColor)
             }
             context.fillPath()
         }
         
         //배경 대각선 라인
         context.setLineWidth(1)
-        context.setStrokeColor(#colorLiteral(red: 0.8928452134, green: 0.9138256311, blue: 0.9553245902, alpha: 1))
+        context.setStrokeColor(chart.strokeColor.cgColor)
         context.setAlpha(1)
         context.setLineDash(phase: 0, lengths: [3.0, 3.0])
         var pointArr:[CGPoint] = []
@@ -438,9 +438,9 @@ open class RadarChartRenderer: LineRadarRenderer
         
         //테두리 원
         context.setLineWidth(1)
-        context.setStrokeColor(#colorLiteral(red: 0.737072885, green: 0.7648418546, blue: 0.827041626, alpha: 1))
+        context.setStrokeColor(chart.circleStrokeColor.cgColor)
         context.setLineDash(phase: 0, lengths: [])
-        context.setFillColor(NSUIColor.white.cgColor)
+        context.setFillColor(chart.fillColor2.cgColor)
         let raduis:CGFloat = 4
         for i in pointArr{
             let rect = CGRect(x: i.x - raduis/2, y: i.y - raduis/2, width: raduis, height: raduis)
