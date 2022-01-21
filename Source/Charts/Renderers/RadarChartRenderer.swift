@@ -159,7 +159,7 @@ open class RadarChartRenderer: LineRadarRenderer
 //            {
 //                drawFilledPath(context: context, path: path, fillColor: dataSet.fillColor, fillAlpha: dataSet.fillAlpha)
                 //그래프 내부 색상
-                context.saveGState()
+//                context.saveGState()
                 context.beginPath()
                 context.addPath(path)
                 
@@ -170,7 +170,7 @@ open class RadarChartRenderer: LineRadarRenderer
                 context.setFillColor(#colorLiteral(red: 0, green: 0.6862745098, blue: 0.7764705882, alpha: 1))
                 context.fillPath()
                 
-                context.restoreGState()
+//                context.restoreGState()
 //            }
 //        }
         
@@ -257,7 +257,7 @@ open class RadarChartRenderer: LineRadarRenderer
         }
         context.clip()
         context.drawRadialGradient(gradient1, startCenter: center, startRadius: 0, endCenter: center, endRadius: 45, options: [])
-        context.restoreGState()
+//        context.restoreGState()
         
         context.beginPath()
         context.move(to: center)
