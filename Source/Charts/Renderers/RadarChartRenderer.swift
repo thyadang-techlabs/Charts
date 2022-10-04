@@ -582,6 +582,7 @@ open class RadarChartRenderer: LineRadarRenderer
         // The modifier allows changing of traits and frame depending on highlight, rotation, etc
         modifier(element)
 
+        
         return element
     }
 }
